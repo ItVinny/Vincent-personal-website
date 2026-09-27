@@ -1,0 +1,158 @@
+// Prisma schema for the Vincent Omolo portfolio admin system.
+// Run `npx prisma migrate dev --name init` after setting DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled connection, used by the running app
+  directUrl = env("DIRECT_URL")   // direct connection, used only for migrations
+}
+
+// ============================================
+// AUTH
+// ============================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String // bcrypt hash — never store plain text
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// MEDIA LIBRARY
+// One Media row per uploaded image. Content models reference it
+// by an optional 1:1 relation so a single image can be swapped
+// without touching the content row's other fields.
+// ============================================
+
+model Media {
+  id        String   @id @default(cuid())
+  url       String
+  key       String? // provider file key, needed to delete from storage
+  alt       String  @default("")
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+
+  hero    HeroSection?
+  about   AboutSection?
+  project Project?
+  journal JournalPost?
+}
+
+// ============================================
+// CONTENT: singletons (one row each, enforced by app logic)
+// ============================================
+
+model HeroSection {
+  id                String  @id @default(cuid())
+  name              String  @default("Vincent Omolo")
+  title             String  @default("Creative Designer & Digital Craftsman")
+  description       String  @default("I partner with forward-thinking teams to create digital products and brands that are elegant, intuitive, and built to last.")
+  primaryCtaText    String  @default("View Work")
+  primaryCtaLink    String  @default("#work")
+  secondaryCtaText  String  @default("About Me")
+  secondaryCtaLink  String  @default("#about")
+  imageId           String? @unique
+  image             Media?  @relation(fields: [imageId], references: [id])
+  updatedAt         DateTime @updatedAt
+}
+
+model AboutSection {
+  id        String   @id @default(cuid())
+  headline  String   @default("I design digital experiences that blend strategy, aesthetics, and technology.")
+  body      String   @default("With a growing foundation in leading initiatives and crafting considered digital solutions, I help ideas turn into clear, beautiful, and impactful outcomes.")
+  linkText  String   @default("More about my approach")
+  linkHref  String   @default("#")
+  imageId   String?  @unique
+  image     Media?   @relation(fields: [imageId], references: [id])
+  updatedAt DateTime @updatedAt
+}
+
+model FooterContent {
+  id        String   @id @default(cuid())
+  tagline   String   @default("Designing what matters. Building with intention.")
+  email     String   @default("hello@vincentomolo.com")
+  linkedin  String?
+  behance   String?
+  instagram String?
+  copyright String   @default("Vincent Omolo. All rights reserved.")
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// CONTENT: repeatable collections
+// ============================================
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  description String
+  link        String?
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  imageId     String?  @unique
+  image       Media?   @relation(fields: [imageId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Service {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  iconName    String // key into a fixed icon set rendered on the frontend
+  order       Int     @default(0)
+  published   Boolean @default(true)
+
+  @@index([order])
+}
+
+model JournalPost {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  date      DateTime @default(now())
+  excerpt   String
+  body      String?
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  imageId   String?  @unique
+  image     Media?   @relation(fields: [imageId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+// ============================================
+// ANALYTICS
+// Simple, self-hosted event log. One row per pageview/section-view.
+// Aggregation queries (totals, top referrers, device split) run
+// against this table directly from the analytics dashboard.
+// ============================================
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String // "pageview" | "section_view"
+  path      String
+  section   String? // "hero" | "work" | "about" | "help" | "journal" | "contact"
+  referrer  String?
+  device    String? // "desktop" | "mobile" | "tablet"
+  country   String?
+  sessionId String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([type])
+  @@index([sessionId])
+}
