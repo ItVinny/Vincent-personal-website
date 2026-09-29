@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { AdminNavLink } from "./_components/AdminNavLink";
+import { ToastProvider } from "./_components/Toast";
 
 // Server-side belt-and-braces check alongside middleware.ts. Middleware
 // blocks the request before it renders; this catches the edge case of
@@ -28,7 +29,8 @@ export default async function AdminLayout({
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#f5f5f7]">
+    <ToastProvider>
+      <div className="flex min-h-screen bg-[#f5f5f7]">
       <aside className="flex w-60 flex-shrink-0 flex-col border-r border-[#e5e5ea] bg-white px-4 py-6">
         <div className="mb-8 flex items-center gap-2 px-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1d1d1f] text-[11px] font-semibold text-white">
@@ -71,5 +73,6 @@ export default async function AdminLayout({
         <main className="mx-auto max-w-5xl px-8 py-8">{children}</main>
       </div>
     </div>
+    </ToastProvider>
   );
 }
