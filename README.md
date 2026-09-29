@@ -84,7 +84,3 @@ I'll add when we build those pieces.
 
 ## A note on running this without a local setup
 
-If installing Node.js and a terminal workflow feels like a lot, **Claude
-Code** (Anthropic's coding tool) can run this project for you end to end —
-install dependencies, set up the database, and walk through deployment —
-without you needing to memorize commands.
