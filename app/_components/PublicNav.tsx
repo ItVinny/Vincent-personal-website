@@ -7,17 +7,17 @@ export function PublicNav() {
   const [open, setOpen] = useState(false);
 
   const links = [
-    { href: "#work", label: "Work" },
-    { href: "#about", label: "About" },
-    { href: "#journal", label: "Journal" },
-    { href: "#contact", label: "Contact" },
+    { href: "/#work", label: "Work" },
+    { href: "/#about", label: "About" },
+    { href: "/#journal", label: "Journal" },
+    { href: "/#contact", label: "Contact" },
   ];
 
   return (
     <header className="sticky top-0 z-50 h-11 bg-black">
       <div className="mx-auto flex h-11 max-w-[1120px] items-center justify-between px-6">
         <Link
-          href="#home"
+          href="/#home"
           className="font-display text-[15px] font-semibold tracking-[-0.01em] text-white"
         >
           VO
@@ -25,23 +25,23 @@ export function PublicNav() {
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 gap-8 md:flex">
           {links.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className="text-[12px] text-white/85 transition hover:text-white"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
-          <a
-            href="#contact"
+          <Link
+            href="/#contact"
             className="rounded-full bg-[#0066cc] px-4 py-1.5 text-[12px] text-white transition hover:bg-[#0071e3]"
           >
             Availability
-          </a>
+          </Link>
         </div>
 
         <button
@@ -63,14 +63,14 @@ export function PublicNav() {
       {open && (
         <nav className="flex flex-col bg-black px-6 pb-4 md:hidden">
           {links.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
               className="border-t border-white/10 py-2.5 text-[14px] text-white/85"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
       )}

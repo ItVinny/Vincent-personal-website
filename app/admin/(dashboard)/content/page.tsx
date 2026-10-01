@@ -36,16 +36,14 @@ export default async function ContentIndexPage() {
     {
       href: "/admin/content/services",
       title: "How I Can Help",
-      description: "Your service cards. Coming next.",
+      description: "Your service cards \u2014 add, edit, reorder, or remove.",
       count: serviceCount,
-      disabled: true,
     },
     {
       href: "/admin/content/journal",
       title: "Journal Posts",
-      description: "Your articles. Coming next.",
+      description: "Your articles \u2014 add, edit, reorder, or remove.",
       count: postCount,
-      disabled: true,
     },
   ];
 
@@ -81,36 +79,21 @@ export default async function ContentIndexPage() {
         Collections
       </h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {collections.map((item) =>
-          item.disabled ? (
-            <div
-              key={item.href}
-              className="rounded-[14px] bg-white/60 p-5 opacity-60"
-            >
-              <div className="mb-1 flex items-center justify-between">
-                <h3 className="text-[15px] font-medium text-[#1d1d1f]">
-                  {item.title}
-                </h3>
-                <span className="text-[13px] text-[#86868b]">{item.count}</span>
-              </div>
-              <p className="text-[13px] text-[#86868b]">{item.description}</p>
+        {collections.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="rounded-[14px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+          >
+            <div className="mb-1 flex items-center justify-between">
+              <h3 className="text-[15px] font-medium text-[#1d1d1f]">
+                {item.title}
+              </h3>
+              <span className="text-[13px] text-[#86868b]">{item.count}</span>
             </div>
-          ) : (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-[14px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
-            >
-              <div className="mb-1 flex items-center justify-between">
-                <h3 className="text-[15px] font-medium text-[#1d1d1f]">
-                  {item.title}
-                </h3>
-                <span className="text-[13px] text-[#86868b]">{item.count}</span>
-              </div>
-              <p className="text-[13px] text-[#86868b]">{item.description}</p>
-            </Link>
-          )
-        )}
+            <p className="text-[13px] text-[#86868b]">{item.description}</p>
+          </Link>
+        ))}
       </div>
     </div>
   );

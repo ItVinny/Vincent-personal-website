@@ -170,3 +170,134 @@ export async function deleteProject(id: string): Promise<ActionResult> {
     return fail(error);
   }
 }
+
+// ============================================
+// SERVICES (repeatable)
+// ============================================
+
+const serviceSchema = z.object({
+  title: z.string().min(1, "Title is required."),
+  description: z.string().min(1, "Description is required."),
+  iconName: z.enum(["target", "grid", "monitor", "compass"]),
+  order: z.coerce.number().int().default(0),
+  published: z.boolean().default(true),
+});
+
+export async function createService(data: unknown): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+    const parsed = serviceSchema.parse(data);
+    await prisma.service.create({ data: parsed });
+    revalidatePath("/");
+    revalidatePath("/admin/content/services");
+    return { success: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+export async function updateService(
+  id: string,
+  data: unknown
+): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+    const parsed = serviceSchema.parse(data);
+    await prisma.service.update({ where: { id }, data: parsed });
+    revalidatePath("/");
+    revalidatePath("/admin/content/services");
+    return { success: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+export async function deleteService(id: string): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+    await prisma.service.delete({ where: { id } });
+    revalidatePath("/");
+    revalidatePath("/admin/content/services");
+    return { success: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+// ============================================
+// JOURNAL POSTS (repeatable)
+// ============================================
+
+const journalSchema = z.object({
+  title: z.string().min(1, "Title is required."),
+  slug: z
+    .string()
+    .min(1, "Slug is required.")
+    .regex(
+      /^[a-z0-9]+(-[a-z0-9]+)*$/,
+      "Slug can only contain lowercase letters, numbers, and hyphens."
+    ),
+  date: z.coerce.date(),
+  excerpt: z.string().min(1, "Excerpt is required."),
+  body: z.string().optional().default(""),
+  order: z.coerce.number().int().default(0),
+  published: z.boolean().default(true),
+});
+
+export async function createJournalPost(data: unknown): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+    const parsed = journalSchema.parse(data);
+
+    const existing = await prisma.journalPost.findUnique({
+      where: { slug: parsed.slug },
+    });
+    if (existing) {
+      return { success: false, error: "That slug is already in use." };
+    }
+
+    await prisma.journalPost.create({ data: parsed });
+    revalidatePath("/");
+    revalidatePath("/admin/content/journal");
+    return { success: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+export async function updateJournalPost(
+  id: string,
+  data: unknown
+): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+    const parsed = journalSchema.parse(data);
+
+    const existing = await prisma.journalPost.findUnique({
+      where: { slug: parsed.slug },
+    });
+    if (existing && existing.id !== id) {
+      return { success: false, error: "That slug is already in use." };
+    }
+
+    await prisma.journalPost.update({ where: { id }, data: parsed });
+    revalidatePath("/");
+    revalidatePath("/admin/content/journal");
+    revalidatePath(`/journal/${parsed.slug}`);
+    return { success: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+export async function deleteJournalPost(id: string): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+    await prisma.journalPost.delete({ where: { id } });
+    revalidatePath("/");
+    revalidatePath("/admin/content/journal");
+    return { success: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
