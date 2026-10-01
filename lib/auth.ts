@@ -2,15 +2,22 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { authConfig } from "@/lib/auth.config";
 
+// This is the full auth setup, including the Credentials provider --
+// which needs Prisma and bcrypt, both Node-only. This file is used
+// by the API route (app/api/auth/[...nextauth]/route.ts) and by
+// Server Components/Actions that call auth() -- all Node runtime.
+//
+// middleware.ts does NOT import this file. It uses lib/auth.config.ts
+// directly, which has no Node-only dependencies and can run on the
+// Edge Runtime. See auth.config.ts for why that split matters.
+//
 // This is the only account the app supports: one admin, the site owner.
 // There is no sign-up flow, and none should be added — the seed script
 // is the only way a user row gets created.
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt" },
-  pages: {
-    signIn: "/admin/login",
-  },
+  ...authConfig,
   providers: [
     Credentials({
       name: "credentials",
@@ -36,16 +43,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.id = user.id;
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user && token.id) {
-        (session.user as { id?: string }).id = token.id as string;
-      }
-      return session;
-    },
-  },
 });
