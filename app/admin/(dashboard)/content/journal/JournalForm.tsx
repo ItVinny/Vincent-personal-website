@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createJournalPost, updateJournalPost } from "@/lib/actions/content";
 import { useToast } from "../../_components/Toast";
 import { Field, TextInput, TextArea, SaveButton } from "../../_components/FormFields";
+import { RichTextEditor } from "../../_components/RichTextEditor";
 
 type JournalData = {
   title: string;
@@ -119,11 +120,9 @@ export function JournalForm({
       </Field>
 
       <Field label="Body (optional, full article text)" htmlFor="body">
-        <TextArea
-          id="body"
-          rows={8}
+        <RichTextEditor
           value={values.body}
-          onChange={(e) => set("body", e.target.value)}
+          onChange={(html) => set("body", html)}
         />
       </Field>
 

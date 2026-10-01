@@ -86,14 +86,13 @@ export default async function JournalPostPage({
           <p className="mb-8 text-[19px] text-[#333333]">{post.excerpt}</p>
 
           {post.body ? (
-            <div className="space-y-5 text-[#1d1d1f]">
-              {post.body
-                .split("\n")
-                .filter((paragraph) => paragraph.trim() !== "")
-                .map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-            </div>
+            <div
+              className="[&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:text-[1.4rem] [&_h2]:font-semibold [&_h2]:tracking-[-0.01em] [&_h3]:mb-2 [&_h3]:mt-6 [&_h3]:text-[1.15rem] [&_h3]:font-semibold [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_mark]:rounded-sm [&_mark]:bg-[#fff59d] [&_mark]:px-0.5"
+              // This content is produced only by the site owner through
+              // the admin's rich text editor -- there's no public
+              // submission path, so rendering it directly is safe here.
+              dangerouslySetInnerHTML={{ __html: post.body }}
+            />
           ) : (
             <p className="text-[15px] italic text-[#86868b]">
               The full article text hasn&apos;t been added yet.
