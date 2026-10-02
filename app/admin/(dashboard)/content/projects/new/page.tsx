@@ -7,7 +7,8 @@ export default function NewProjectPage() {
         Add Project
       </h1>
       <p className="mb-8 text-[15px] text-[#6e6e73]">
-        This will appear as a new card in Selected Work.
+        This will appear as a new card in Selected Work. You can attach an
+        image after creating it.
       </p>
       <ProjectForm
         initial={{

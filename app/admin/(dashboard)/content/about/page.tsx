@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { AboutForm } from "./AboutForm";
+import { ImagePicker } from "../../_components/ImagePicker";
 
 export default async function AboutContentPage() {
-  const about = await prisma.aboutSection.findFirst();
+  const [about, library] = await Promise.all([
+    prisma.aboutSection.findFirst({ include: { image: true } }),
+    prisma.media.findMany({ orderBy: { createdAt: "desc" } }),
+  ]);
 
   const initial = {
     headline:
@@ -23,6 +27,18 @@ export default async function AboutContentPage() {
       <p className="mb-8 text-[15px] text-[#6e6e73]">
         The headline and body text on your homepage's About section.
       </p>
+
+      <div className="mb-8 max-w-xl rounded-[18px] bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-3 text-[13px] font-medium text-[#1d1d1f]">
+          About image
+        </h2>
+        <ImagePicker
+          target={{ type: "about" }}
+          current={about?.image ? { id: about.image.id, url: about.image.url, alt: about.image.alt } : null}
+          library={library.map((m) => ({ id: m.id, url: m.url, alt: m.alt }))}
+        />
+      </div>
+
       <AboutForm initial={initial} />
     </div>
   );

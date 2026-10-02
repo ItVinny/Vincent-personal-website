@@ -9,7 +9,8 @@ export default function NewJournalPostPage() {
         Add Journal Post
       </h1>
       <p className="mb-8 text-[15px] text-[#6e6e73]">
-        This will appear as a new card in your Journal section.
+        This will appear as a new card in your Journal section. You can
+        attach a cover image after creating it.
       </p>
       <JournalForm
         initial={{

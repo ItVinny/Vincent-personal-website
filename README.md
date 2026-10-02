@@ -78,9 +78,29 @@ Codepen or a browser-only tool — it's a real server application.
    (Vercel's CLI or a one-off script both work) before the app can read
    or write content.
 
-Image uploads (UploadThing) and the analytics dashboard aren't wired up
-yet — those need their own environment variables and setup steps, which
-I'll add when we build those pieces.
+## Setting up image uploads (UploadThing)
+
+1. Go to [uploadthing.com](https://uploadthing.com) and sign up (free tier
+   is enough for this project).
+2. Create a new app from their dashboard.
+3. Find your API token — usually under the app's "API Keys" section —
+   and copy it.
+4. In `.env`, set `UPLOADTHING_TOKEN` to that value. Do the same in
+   Vercel's Environment Variables for your production deployment.
+5. Restart your dev server (`npm run dev`) if it was already running.
+6. Visit `/admin/media` and try uploading an image — if it fails,
+   double check the token was copied without extra spaces.
+
+Once an image is uploaded, go to any content editor (Hero, About, a
+specific Project, or a Journal post) and use "Choose from library" to
+attach it — that's what actually replaces the gradient placeholder on
+your live homepage.
+
+The analytics dashboard isn't wired up yet — that's the next piece.
 
 ## A note on running this without a local setup
 
+If installing Node.js and a terminal workflow feels like a lot, **Claude
+Code** (Anthropic's coding tool) can run this project for you end to end —
+install dependencies, set up the database, and walk through deployment —
+without you needing to memorize commands.

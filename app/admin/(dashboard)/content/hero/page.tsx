@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { HeroForm } from "./HeroForm";
+import { ImagePicker } from "../../_components/ImagePicker";
 
 export default async function HeroContentPage() {
-  const hero = await prisma.heroSection.findFirst();
+  const [hero, library] = await Promise.all([
+    prisma.heroSection.findFirst({ include: { image: true } }),
+    prisma.media.findMany({ orderBy: { createdAt: "desc" } }),
+  ]);
 
   const initial = {
     name: hero?.name ?? "Vincent Omolo",
@@ -24,6 +28,18 @@ export default async function HeroContentPage() {
       <p className="mb-8 text-[15px] text-[#6e6e73]">
         This is the first thing visitors see on your homepage.
       </p>
+
+      <div className="mb-8 max-w-xl rounded-[18px] bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-3 text-[13px] font-medium text-[#1d1d1f]">
+          Hero image
+        </h2>
+        <ImagePicker
+          target={{ type: "hero" }}
+          current={hero?.image ? { id: hero.image.id, url: hero.image.url, alt: hero.image.alt } : null}
+          library={library.map((m) => ({ id: m.id, url: m.url, alt: m.alt }))}
+        />
+      </div>
+
       <HeroForm initial={initial} />
     </div>
   );
