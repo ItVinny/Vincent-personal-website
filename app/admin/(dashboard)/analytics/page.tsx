@@ -74,21 +74,21 @@ export default async function AnalyticsPage() {
     prisma.analyticsEvent.groupBy({
       by: ["referrer"],
       where: { type: "pageview", createdAt: { gte: since30 } },
-      _count: { _all: true },
-      orderBy: { _count: { _all: "desc" } },
+      _count: true,
+      orderBy: { _count: "desc" },
       take: 6,
     }),
     prisma.analyticsEvent.groupBy({
       by: ["device"],
       where: { type: "pageview", createdAt: { gte: since30 } },
-      _count: { _all: true },
-      orderBy: { _count: { _all: "desc" } },
+      _count: true,
+      orderBy: { _count: "desc" },
     }),
     prisma.analyticsEvent.groupBy({
       by: ["section"],
       where: { type: "section_view", createdAt: { gte: since30 } },
-      _count: { _all: true },
-      orderBy: { _count: { _all: "desc" } },
+      _count: true,
+      orderBy: { _count: "desc" },
     }),
   ]);
 
@@ -98,21 +98,21 @@ export default async function AnalyticsPage() {
 
   const referrerData = referrerGroups.map((g) => ({
     label: g.referrer ? hostnameOf(g.referrer) : "Direct",
-    count: g._count._all,
+    count: g._count,
   }));
 
   const deviceData = deviceGroups.map((g) => ({
     label: g.device
       ? g.device.charAt(0).toUpperCase() + g.device.slice(1)
       : "Unknown",
-    count: g._count._all,
+    count: g._count,
   }));
 
   const sectionData = sectionGroups
     .filter((g) => g.section)
     .map((g) => ({
       label: SECTION_LABELS[g.section as string] ?? (g.section as string),
-      count: g._count._all,
+      count: g._count,
     }));
 
   return (
