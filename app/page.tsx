@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PublicNav } from "./_components/PublicNav";
+import { AnalyticsTracker } from "./_components/AnalyticsTracker";
+import { SectionViewTracker } from "./_components/SectionViewTracker";
 import { MediaOrPlaceholder } from "./_components/MediaOrPlaceholder";
 import { ServiceIcon } from "./_components/ServiceIcon";
 
@@ -46,6 +48,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <AnalyticsTracker path="/" />
+      <SectionViewTracker />
       <PublicNav />
 
       <main className="font-body text-[17px] leading-[1.5] text-[#1d1d1f]">

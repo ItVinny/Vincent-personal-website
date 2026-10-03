@@ -96,11 +96,18 @@ specific Project, or a Journal post) and use "Choose from library" to
 attach it — that's what actually replaces the gradient placeholder on
 your live homepage.
 
-The analytics dashboard isn't wired up yet — that's the next piece.
+## Analytics
 
-## A note on running this without a local setup
+No third-party service needed — pageviews and section views are tracked
+directly into your own database (the `AnalyticsEvent` table), and the
+`/admin/analytics` dashboard reads straight from it. A small tracking
+component on the homepage and journal article pages fires one event per
+visit; nothing is tracked on `/admin` pages themselves. It needs no setup
+beyond what's already running, but won't show anything until your live
+site actually gets some visits.
 
-If installing Node.js and a terminal workflow feels like a lot, **Claude
-Code** (Anthropic's coding tool) can run this project for you end to end —
-install dependencies, set up the database, and walk through deployment —
-without you needing to memorize commands.
+## Settings
+
+`/admin/settings` currently handles one thing: changing the admin
+password. The account itself is still the single one created by the
+seed script — there's no multi-user support.

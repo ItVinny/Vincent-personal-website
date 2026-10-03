@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PublicNav } from "../../_components/PublicNav";
+import { AnalyticsTracker } from "../../_components/AnalyticsTracker";
 import { MediaOrPlaceholder } from "../../_components/MediaOrPlaceholder";
 
 export const revalidate = 60;
@@ -51,6 +52,7 @@ export default async function JournalPostPage({
 
   return (
     <>
+      <AnalyticsTracker path={`/journal/${slug}`} />
       <PublicNav />
 
       <main className="font-body text-[17px] leading-[1.6] text-[#1d1d1f]">
