@@ -5,7 +5,7 @@
 
 const strokeProps = {
   fill: "none",
-  stroke: "#0066cc",
+  stroke: "#00a35c", // brand-green-mid -- readable on both light cards and dark-teal cards
   strokeWidth: 1.5,
 } as const;
 
