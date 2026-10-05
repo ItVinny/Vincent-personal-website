@@ -5,10 +5,3 @@
 html {
   scroll-behavior: smooth;
 }
-
-/* Fallback so overscroll/transition edges never flash white in dark
-   mode on the public site. Admin pages never get the "dark" class,
-   so they're unaffected. */
-html.dark body {
-  background-color: #001e2b;
-}
