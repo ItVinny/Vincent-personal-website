@@ -80,6 +80,8 @@ model FooterContent {
   tagline   String   @default("Designing what matters. Building with intention.")
   email     String   @default("hello@vincentomolo.com")
   linkedin  String?
+  whatsapp  String? // raw number with country code, no symbols, e.g. "254712345678"
+  telegram  String? // username without the @
   behance   String?
   instagram String?
   copyright String   @default("Vincent Omolo. All rights reserved.")

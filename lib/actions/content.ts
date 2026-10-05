@@ -95,6 +95,8 @@ const footerSchema = z.object({
   tagline: z.string().min(1, "Tagline is required."),
   email: z.string().email("Enter a valid email address."),
   linkedin: z.string().optional().or(z.literal("")),
+  whatsapp: z.string().optional().or(z.literal("")),
+  telegram: z.string().optional().or(z.literal("")),
   behance: z.string().optional().or(z.literal("")),
   instagram: z.string().optional().or(z.literal("")),
   copyright: z.string().min(1),

@@ -9,6 +9,8 @@ type FooterData = {
   tagline: string;
   email: string;
   linkedin: string;
+  whatsapp: string;
+  telegram: string;
   behance: string;
   instagram: string;
   copyright: string;
@@ -62,6 +64,28 @@ export function FooterForm({ initial }: { initial: FooterData }) {
         />
       </Field>
 
+      <h2 className="mb-3 mt-6 text-[13px] font-medium uppercase tracking-wide text-[#86868b]">
+        Contact icons shown on your homepage
+      </h2>
+
+      <Field label="WhatsApp number" htmlFor="whatsapp">
+        <TextInput
+          id="whatsapp"
+          value={values.whatsapp}
+          onChange={(e) => set("whatsapp", e.target.value.replace(/[^\d]/g, ""))}
+          placeholder="254712345678 (country code, no + or spaces)"
+        />
+      </Field>
+
+      <Field label="Telegram username" htmlFor="telegram">
+        <TextInput
+          id="telegram"
+          value={values.telegram}
+          onChange={(e) => set("telegram", e.target.value.replace(/^@/, ""))}
+          placeholder="yourusername (without the @)"
+        />
+      </Field>
+
       <Field label="LinkedIn URL" htmlFor="linkedin">
         <TextInput
           id="linkedin"
@@ -70,6 +94,10 @@ export function FooterForm({ initial }: { initial: FooterData }) {
           placeholder="https://linkedin.com/in/..."
         />
       </Field>
+
+      <h2 className="mb-3 mt-6 text-[13px] font-medium uppercase tracking-wide text-[#86868b]">
+        Other links (stored, not currently shown on the homepage)
+      </h2>
 
       <Field label="Behance URL" htmlFor="behance">
         <TextInput

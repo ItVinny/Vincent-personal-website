@@ -106,8 +106,66 @@ visit; nothing is tracked on `/admin` pages themselves. It needs no setup
 beyond what's already running, but won't show anything until your live
 site actually gets some visits.
 
+## Final touches: favicon, inquiry form, contact icons, centered footer
+
+**Favicon** — `app/icon.png` and `app/apple-icon.png` are your logo.
+Next.js auto-detects these and injects the right `<link>` tags itself;
+nothing else to configure.
+
+**Inquiry form emails (Gmail)**
+
+1. Turn on 2-Step Verification on the Google account for
+   `vingoldearn@gmail.com`, if it isn't already (myaccount.google.com →
+   Security).
+2. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+   and create a new App Password (name it something like "Portfolio
+   site").
+3. Copy the 16-character password it gives you (shown with spaces,
+   like `abcd efgh ijkl mnop` — you can paste it with or without the
+   spaces).
+4. Set `GMAIL_USER="vingoldearn@gmail.com"` and
+   `GMAIL_APP_PASSWORD="that 16-character password"` in `.env`, and
+   the same two values in Vercel's Environment Variables.
+5. The inquiry form at the bottom of your homepage now emails you
+   directly, with the visitor's email set as "Reply-To" so you can
+   just hit reply.
+
+**Contact icons (WhatsApp / Telegram / LinkedIn)** — these pull from
+new fields on your Footer content. Go to `/admin/content/footer` and
+fill in:
+- WhatsApp: your number with country code, digits only (e.g.
+  `254712345678`, no `+` or spaces)
+- Telegram: your username, without the `@`
+- LinkedIn: your full profile URL (same field as before)
+
+Each icon only appears once its field has something in it — nothing
+shows as a dead link in the meantime.
+
+**New database columns** — this update added `whatsapp` and `telegram`
+to the `FooterContent` table, which means a real schema migration is
+needed (the first one since you went live). Run this locally, then
+push the generated migration file:
+```
+npx prisma migrate dev --name add_whatsapp_telegram
+```
+Commit the new file it creates under `prisma/migrations/`, push, and
+then run `npx prisma migrate deploy` once against your production
+database (same as the one-time step from initial deployment) so
+Vercel's database has the new columns too.
+
+**Centered footer** — the footer is now a single centered column
+(logo, tagline, nav links, contact icons, copyright) instead of the
+previous spread-out multi-column layout.
+
 ## Settings
 
 `/admin/settings` currently handles one thing: changing the admin
 password. The account itself is still the single one created by the
 seed script — there's no multi-user support.
+
+## A note on running this without a local setup
+
+If installing Node.js and a terminal workflow feels like a lot, **Claude
+Code** (Anthropic's coding tool) can run this project for you end to end —
+install dependencies, set up the database, and walk through deployment —
+without you needing to memorize commands.

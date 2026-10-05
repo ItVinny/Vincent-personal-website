@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { ToastProvider } from "./_components/Toast";
 import { AdminShell } from "./_components/AdminShell";
+import { InactivityLogout } from "./_components/InactivityLogout";
 
 // Server-side belt-and-braces check alongside middleware.ts. Middleware
 // blocks the request before it renders; this catches the edge case of
@@ -35,6 +36,7 @@ export default async function AdminLayout({
 
   return (
     <ToastProvider>
+      <InactivityLogout />
       <AdminShell
         navItems={navItems}
         email={session.user?.email ?? ""}

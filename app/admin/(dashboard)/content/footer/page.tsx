@@ -8,6 +8,8 @@ export default async function FooterContentPage() {
     tagline: footer?.tagline ?? "Designing what matters. Building with intention.",
     email: footer?.email ?? "hello@vincentomolo.com",
     linkedin: footer?.linkedin ?? "",
+    whatsapp: footer?.whatsapp ?? "",
+    telegram: footer?.telegram ?? "",
     behance: footer?.behance ?? "",
     instagram: footer?.instagram ?? "",
     copyright: footer?.copyright ?? "Vincent Omolo. All rights reserved.",

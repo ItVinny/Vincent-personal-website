@@ -4,6 +4,8 @@ import { AnalyticsTracker } from "./_components/AnalyticsTracker";
 import { SectionViewTracker } from "./_components/SectionViewTracker";
 import { MediaOrPlaceholder } from "./_components/MediaOrPlaceholder";
 import { ServiceIcon } from "./_components/ServiceIcon";
+import { InquiryForm } from "./_components/InquiryForm";
+import { ContactIcons } from "./_components/ContactIcons";
 
 // Revalidate periodically rather than on every request, since content
 // only changes when the owner edits it in /admin. Tune this down (or
@@ -264,7 +266,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* CONTACT */}
+        {/* CONTACT -- email CTA, social icons, and an inquiry form
+            that emails directly without leaving the page */}
         <section id="contact" className="bg-white py-16 text-center md:py-20">
           <div className="mx-auto max-w-[560px] px-6">
             <h2 className="mb-4 font-display text-[1.9rem] font-semibold tracking-[-0.02em] md:text-[2.6rem]">
@@ -275,83 +278,53 @@ export default async function HomePage() {
             </p>
             <a
               href={`mailto:${footer?.email ?? "hello@vincentomolo.com"}`}
-              className="inline-block rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[15px] text-white transition hover:bg-[#0071e3]"
+              className="mb-7 inline-block rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[15px] text-white transition hover:bg-[#0071e3]"
             >
               {footer?.email ?? "hello@vincentomolo.com"}
             </a>
+
+            <ContactIcons
+              whatsapp={footer?.whatsapp}
+              telegram={footer?.telegram}
+              linkedin={footer?.linkedin}
+            />
+
+            <div className="mt-10 rounded-[18px] bg-[#f5f5f7] p-6 sm:p-8">
+              <h3 className="mb-5 font-display text-[16px] font-semibold">
+                Or send an inquiry directly
+              </h3>
+              <InquiryForm />
+            </div>
           </div>
         </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="bg-[#f5f5f7] pt-14">
-        <div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-10 border-b border-black/10 px-6 pb-10 md:grid-cols-[1fr_2fr]">
-          <div className="max-w-[220px]">
-            <span className="font-display text-[17px] font-semibold">VO</span>
-            <p className="mt-3.5 text-[14px] leading-[1.5] text-[#7a7a7a]">
-              {footer?.tagline ??
-                "Designing what matters. Building with intention."}
-            </p>
+      {/* FOOTER -- a single centered column, per the "bottom middle"
+          layout: everything stacks and aligns to the horizontal center
+          rather than spreading edge-to-edge in columns. */}
+      <footer className="bg-[#f5f5f7] py-14 text-center">
+        <div className="mx-auto max-w-[480px] px-6">
+          <span className="font-display text-[17px] font-semibold">VO</span>
+          <p className="mt-3 text-[14px] leading-[1.5] text-[#7a7a7a]">
+            {footer?.tagline ?? "Designing what matters. Building with intention."}
+          </p>
+
+          <nav className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[14px] text-[#7a7a7a]">
+            <a href="#work" className="hover:text-[#1d1d1f]">Work</a>
+            <a href="#about" className="hover:text-[#1d1d1f]">About</a>
+            <a href="#journal" className="hover:text-[#1d1d1f]">Journal</a>
+            <a href="#contact" className="hover:text-[#1d1d1f]">Contact</a>
+          </nav>
+
+          <div className="mt-6">
+            <ContactIcons
+              whatsapp={footer?.whatsapp}
+              telegram={footer?.telegram}
+              linkedin={footer?.linkedin}
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            <div>
-              <h4 className="mb-3.5 font-display text-[13px] font-semibold">
-                Work
-              </h4>
-              <a href="#work" className="mb-2.5 block text-[14px] text-[#7a7a7a] hover:text-[#1d1d1f]">
-                Selected Work
-              </a>
-            </div>
-            <div>
-              <h4 className="mb-3.5 font-display text-[13px] font-semibold">
-                About
-              </h4>
-              <a href="#about" className="mb-2.5 block text-[14px] text-[#7a7a7a] hover:text-[#1d1d1f]">
-                About Me
-              </a>
-            </div>
-            <div>
-              <h4 className="mb-3.5 font-display text-[13px] font-semibold">
-                Journal
-              </h4>
-              <a href="#journal" className="mb-2.5 block text-[14px] text-[#7a7a7a] hover:text-[#1d1d1f]">
-                Latest Articles
-              </a>
-            </div>
-            <div>
-              <h4 className="mb-3.5 font-display text-[13px] font-semibold">
-                Contact
-              </h4>
-              <a
-                href={`mailto:${footer?.email ?? "hello@vincentomolo.com"}`}
-                className="mb-2.5 block text-[14px] text-[#7a7a7a] hover:text-[#1d1d1f]"
-              >
-                {footer?.email ?? "hello@vincentomolo.com"}
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-between gap-3 px-6 py-6 text-[13px] text-[#7a7a7a]">
-          <div className="flex gap-4">
-            {footer?.linkedin && (
-              <a href={footer.linkedin} className="hover:text-[#1d1d1f]">
-                LinkedIn
-              </a>
-            )}
-            {footer?.behance && (
-              <a href={footer.behance} className="hover:text-[#1d1d1f]">
-                Behance
-              </a>
-            )}
-            {footer?.instagram && (
-              <a href={footer.instagram} className="hover:text-[#1d1d1f]">
-                Instagram
-              </a>
-            )}
-          </div>
-          <p>
+          <p className="mt-6 text-[13px] text-[#86868b]">
             &copy; {new Date().getFullYear()}{" "}
             {footer?.copyright ?? "Vincent Omolo. All rights reserved."}
           </p>
