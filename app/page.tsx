@@ -326,7 +326,7 @@ export default async function HomePage() {
 
           <p className="mt-6 text-[13px] text-[#86868b]">
             &copy; {new Date().getFullYear()}{" "}
-            {footer?.copyright ?? "Vincent Omolo. All rights reserved."}
+            {footer?.copyright ?? "Vincent. All rights reserved."}
           </p>
         </div>
       </footer>

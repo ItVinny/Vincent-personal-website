@@ -162,10 +162,3 @@ previous spread-out multi-column layout.
 `/admin/settings` currently handles one thing: changing the admin
 password. The account itself is still the single one created by the
 seed script — there's no multi-user support.
-
-## A note on running this without a local setup
-
-If installing Node.js and a terminal workflow feels like a lot, **Claude
-Code** (Anthropic's coding tool) can run this project for you end to end —
-install dependencies, set up the database, and walk through deployment —
-without you needing to memorize commands.
