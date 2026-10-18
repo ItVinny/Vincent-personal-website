@@ -3,9 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
-
-const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_MINUTES = 15;
+import { MAX_FAILED_ATTEMPTS, LOCKOUT_MINUTES } from "@/lib/auth-constants";
 
 // This is the full auth setup, including the Credentials provider --
 // which needs Prisma and bcrypt, both Node-only. This file is used
@@ -30,10 +28,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
         if (!user) return null;
 
-        // Locked out: reject without even checking the password, and
-        // without revealing that the account is locked (vs. just a
-        // wrong password) -- that distinction is exactly what an
-        // attacker probing for valid emails would want to learn.
         const now = new Date();
         if (user.lockedUntil && user.lockedUntil > now) {
           return null;
@@ -59,7 +53,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        // Successful login -- clear any prior failed-attempt count.
         if (user.failedLoginAttempts > 0 || user.lockedUntil) {
           await prisma.user.update({
             where: { id: user.id },
