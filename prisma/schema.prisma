@@ -1,5 +1,5 @@
 // Prisma schema for the Vincent Omolo portfolio admin system.
-// Run `npx prisma migrate dev --name init` after setting DATABASE_URL.
+// Run `npx prisma migrate dev --name <description>` after any change here.
 
 generator client {
   provider = "prisma-client-js"
@@ -20,22 +20,27 @@ model User {
   email     String   @unique
   password  String // bcrypt hash — never store plain text
   name      String?
+
+  // Brute-force protection: incremented on each failed login,
+  // reset to 0 on success. lockedUntil is set once attempts hit the
+  // threshold in lib/auth.ts, and checked before even comparing the
+  // password on the next attempt.
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 // ============================================
 // MEDIA LIBRARY
-// One Media row per uploaded image. Content models reference it
-// by an optional 1:1 relation so a single image can be swapped
-// without touching the content row's other fields.
 // ============================================
 
 model Media {
   id        String   @id @default(cuid())
   url       String
-  key       String? // provider file key, needed to delete from storage
-  alt       String  @default("")
+  key       String?
+  alt       String   @default("")
   width     Int?
   height    Int?
   createdAt DateTime @default(now())
@@ -47,20 +52,20 @@ model Media {
 }
 
 // ============================================
-// CONTENT: singletons (one row each, enforced by app logic)
+// CONTENT: singletons
 // ============================================
 
 model HeroSection {
-  id                String  @id @default(cuid())
-  name              String  @default("Vincent Omolo")
-  title             String  @default("Creative Designer & Digital Craftsman")
-  description       String  @default("I partner with forward-thinking teams to create digital products and brands that are elegant, intuitive, and built to last.")
-  primaryCtaText    String  @default("View Work")
-  primaryCtaLink    String  @default("#work")
-  secondaryCtaText  String  @default("About Me")
-  secondaryCtaLink  String  @default("#about")
-  imageId           String? @unique
-  image             Media?  @relation(fields: [imageId], references: [id])
+  id                String   @id @default(cuid())
+  name              String   @default("Vincent Omolo")
+  title             String   @default("Creative Designer & Digital Craftsman")
+  description       String   @default("I partner with forward-thinking teams to create digital products and brands that are elegant, intuitive, and built to last.")
+  primaryCtaText    String   @default("View Work")
+  primaryCtaLink    String   @default("#work")
+  secondaryCtaText  String   @default("About Me")
+  secondaryCtaLink  String   @default("#about")
+  imageId           String?  @unique
+  image             Media?   @relation(fields: [imageId], references: [id])
   updatedAt         DateTime @updatedAt
 }
 
@@ -112,7 +117,7 @@ model Service {
   id          String  @id @default(cuid())
   title       String
   description String
-  iconName    String // key into a fixed icon set rendered on the frontend
+  iconName    String
   order       Int     @default(0)
   published   Boolean @default(true)
 
@@ -138,18 +143,15 @@ model JournalPost {
 
 // ============================================
 // ANALYTICS
-// Simple, self-hosted event log. One row per pageview/section-view.
-// Aggregation queries (totals, top referrers, device split) run
-// against this table directly from the analytics dashboard.
 // ============================================
 
 model AnalyticsEvent {
   id        String   @id @default(cuid())
-  type      String // "pageview" | "section_view"
+  type      String
   path      String
-  section   String? // "hero" | "work" | "about" | "help" | "journal" | "contact"
+  section   String?
   referrer  String?
-  device    String? // "desktop" | "mobile" | "tablet"
+  device    String?
   country   String?
   sessionId String
   createdAt DateTime @default(now())

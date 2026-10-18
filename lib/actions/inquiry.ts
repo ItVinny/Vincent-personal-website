@@ -2,26 +2,30 @@
 
 import { z } from "zod";
 import nodemailer from "nodemailer";
-
-// Public-facing, like lib/actions/analytics.ts -- no auth check, since
-// any visitor is meant to call this. Unlike analytics, a failure here
-// DOES need to surface to the visitor (they're trying to reach you),
-// so this one does not fail silently.
+import { headers } from "next/headers";
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 const inquirySchema = z.object({
   name: z.string().min(1, "Name is required.").max(100),
   email: z.string().email("Enter a valid email address."),
   message: z.string().min(10, "Message should be at least 10 characters.").max(5000),
-  // Honeypot: a field real visitors never see or fill in (hidden via
-  // CSS in the form), but basic spam bots fill every field blindly.
-  // If this has anything in it, silently pretend success and do
-  // nothing further -- no need to tip off the bot.
-  website: z.string().max(0).optional().or(z.literal("")),
+  website: z.string().max(0).optional().or(z.literal("")), // honeypot
 });
 
 type ActionResult = { success: true } | { success: false; error: string };
 
 export async function sendInquiry(data: unknown): Promise<ActionResult> {
+  // 5 submissions per 10 minutes per visitor -- generous for a real
+  // person filling out a contact form, tight against a script.
+  const reqHeaders = await headers();
+  const ip = getClientIp(reqHeaders);
+  if (isRateLimited(`inquiry:${ip}`, 5, 10 * 60 * 1000)) {
+    return {
+      success: false,
+      error: "Too many messages sent recently. Please try again in a few minutes.",
+    };
+  }
+
   let parsed;
   try {
     parsed = inquirySchema.parse(data);
@@ -32,8 +36,8 @@ export async function sendInquiry(data: unknown): Promise<ActionResult> {
     return { success: false, error: "Invalid input." };
   }
 
-  // Honeypot tripped -- report success without sending anything.
   if (parsed.website) {
+    // Honeypot tripped -- report success without sending anything.
     return { success: true };
   }
 

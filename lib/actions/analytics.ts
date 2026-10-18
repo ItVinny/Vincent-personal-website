@@ -1,12 +1,8 @@
 "use server";
 
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-
-// These actions are called from public pages, by anyone visiting the
-// site -- unlike lib/actions/content.ts and media.ts, they deliberately
-// have NO auth check, since that's the whole point. They also never
-// throw back to the caller: a failed analytics write should never
-// surface as a broken page for a visitor.
+import { isRateLimited, getClientIp } from "@/lib/rate-limit";
 
 function clip(value: string | null | undefined, max: number) {
   if (!value) return null;
@@ -20,6 +16,12 @@ export async function trackPageview(data: {
   sessionId: string;
 }) {
   try {
+    // Generous limit -- real visitors trigger this once per page
+    // load; this just stops a script from flooding the events table.
+    const reqHeaders = await headers();
+    const ip = getClientIp(reqHeaders);
+    if (isRateLimited(`pageview:${ip}`, 60, 60 * 1000)) return;
+
     await prisma.analyticsEvent.create({
       data: {
         type: "pageview",
@@ -30,7 +32,7 @@ export async function trackPageview(data: {
       },
     });
   } catch {
-    // Swallow intentionally -- see note above.
+    // Analytics failures should never break the visitor's experience.
   }
 }
 
@@ -39,6 +41,10 @@ export async function trackSectionView(data: {
   sessionId: string;
 }) {
   try {
+    const reqHeaders = await headers();
+    const ip = getClientIp(reqHeaders);
+    if (isRateLimited(`section:${ip}`, 60, 60 * 1000)) return;
+
     await prisma.analyticsEvent.create({
       data: {
         type: "section_view",
@@ -48,6 +54,6 @@ export async function trackSectionView(data: {
       },
     });
   } catch {
-    // Swallow intentionally -- see note above.
+    // Analytics failures should never break the visitor's experience.
   }
 }
