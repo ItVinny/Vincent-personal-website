@@ -266,8 +266,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* CONTACT -- email CTA, social icons, and an inquiry form
-            that emails directly without leaving the page */}
+        {/* CONTACT -- inquiry form only. Email link and social icons
+            live in the footer now, not duplicated here. */}
         <section id="contact" className="bg-white py-16 text-center md:py-20">
           <div className="mx-auto max-w-[560px] px-6">
             <h2 className="mb-4 font-display text-[1.9rem] font-semibold tracking-[-0.02em] md:text-[2.6rem]">
@@ -276,22 +276,10 @@ export default async function HomePage() {
             <p className="mb-7 text-[#333333]">
               Reach out about a project, a collaboration, or just to say hello.
             </p>
-            <a
-              href={`mailto:${footer?.email ?? "hello@vincentomolo.com"}`}
-              className="mb-7 inline-block rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[15px] text-white transition hover:bg-[#0071e3]"
-            >
-              {footer?.email ?? "hello@vincentomolo.com"}
-            </a>
 
-            <ContactIcons
-              whatsapp={footer?.whatsapp}
-              telegram={footer?.telegram}
-              linkedin={footer?.linkedin}
-            />
-
-            <div className="mt-10 rounded-[18px] bg-[#f5f5f7] p-6 sm:p-8">
+            <div className="rounded-[18px] bg-[#f5f5f7] p-6 sm:p-8">
               <h3 className="mb-5 font-display text-[16px] font-semibold">
-                Or send an inquiry directly
+                Send an inquiry
               </h3>
               <InquiryForm />
             </div>
@@ -299,9 +287,8 @@ export default async function HomePage() {
         </section>
       </main>
 
-      {/* FOOTER -- a single centered column, per the "bottom middle"
-          layout: everything stacks and aligns to the horizontal center
-          rather than spreading edge-to-edge in columns. */}
+      {/* FOOTER -- a single centered column. Email and social icons
+          live here only now. */}
       <footer className="bg-[#f5f5f7] py-14 text-center">
         <div className="mx-auto max-w-[480px] px-6">
           <span className="font-display text-[17px] font-semibold">VO</span>
@@ -316,7 +303,14 @@ export default async function HomePage() {
             <a href="#contact" className="hover:text-[#1d1d1f]">Contact</a>
           </nav>
 
-          <div className="mt-6">
+          <a
+            href={`mailto:${footer?.email ?? "hello@vincentomolo.com"}`}
+            className="mt-5 inline-block text-[14px] text-[#0066cc] hover:text-[#0071e3]"
+          >
+            {footer?.email ?? "hello@vincentomolo.com"}
+          </a>
+
+          <div className="mt-5">
             <ContactIcons
               whatsapp={footer?.whatsapp}
               telegram={footer?.telegram}
@@ -326,7 +320,7 @@ export default async function HomePage() {
 
           <p className="mt-6 text-[13px] text-[#86868b]">
             &copy; {new Date().getFullYear()}{" "}
-            {footer?.copyright ?? "Vincent. All rights reserved."}
+            {footer?.copyright ?? "Vincent Omolo. All rights reserved."}
           </p>
         </div>
       </footer>
