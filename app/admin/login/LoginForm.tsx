@@ -3,48 +3,66 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { getLoginAttemptStatus } from "@/lib/actions/auth-status";
+import { requestLoginCode } from "@/lib/actions/two-factor";
+import { getOtpStatus } from "@/lib/actions/auth-status";
+
+type Step = "password" | "code";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/admin";
 
+  const [step, setStep] = useState<Step>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handlePasswordSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const result = await requestLoginCode(email, password);
+    setLoading(false);
+
+    if (!result.success) {
+      setError(result.error);
+      return;
+    }
+
+    setCode("");
+    setInfo(`We sent a 6-digit code to ${maskEmail(email)}. It expires in 10 minutes.`);
+    setStep("code");
+  }
+
+  async function handleCodeSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     const result = await signIn("credentials", {
       email,
-      password,
+      code,
       redirect: false,
     });
 
     if (result?.error) {
-      // Successful sign-in clears the lockout counter server-side, so
-      // querying it only after a FAILURE is what makes this message
-      // accurate -- a status check instead would show stale numbers
-      // from before this attempt.
-      const status = await getLoginAttemptStatus(email);
+      const status = await getOtpStatus(email);
       setLoading(false);
 
-      if (status.status === "locked") {
-        setError(
-          `Too many failed attempts. Try again in ${status.minutesRemaining} minute${status.minutesRemaining === 1 ? "" : "s"}.`
-        );
+      if (status.status === "expired") {
+        setError("That code has expired. Request a new one below.");
+      } else if (status.status === "no_pending_code") {
+        setError("No code is pending. Request a new one below.");
       } else if (status.status === "attempts_remaining" && status.remaining > 0) {
-        setError(
-          `Incorrect email or password. ${status.remaining} attempt${status.remaining === 1 ? "" : "s"} remaining before lockout.`
-        );
+        setError(`Incorrect code. ${status.remaining} attempt${status.remaining === 1 ? "" : "s"} remaining.`);
       } else {
-        setError("Incorrect email or password.");
+        setError("Incorrect code. Request a new one below.");
       }
       return;
     }
@@ -52,6 +70,25 @@ export function LoginForm() {
     setLoading(false);
     router.push(from);
     router.refresh();
+  }
+
+  async function handleResend() {
+    setError(null);
+    setInfo(null);
+    setLoading(true);
+    const result = await requestLoginCode(email, password);
+    setLoading(false);
+
+    if (!result.success) {
+      // The password itself can't have changed since step 1, but the
+      // account could have been locked out between then and now by
+      // excessive attempts elsewhere -- surface that if so.
+      setError(result.error);
+      setStep("password");
+      return;
+    }
+    setCode("");
+    setInfo(`A new code was sent to ${maskEmail(email)}.`);
   }
 
   return (
@@ -68,77 +105,140 @@ export function LoginForm() {
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-[18px] bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-      >
-        <div className="mb-4">
-          <label
-            htmlFor="email"
-            className="mb-1.5 block text-[13px] font-medium text-[#1d1d1f]"
-          >
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="username"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-[10px] border border-[#d2d2d7] px-3.5 py-2.5 text-[15px] text-[#1d1d1f] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
-          />
-        </div>
+      <div className="rounded-[18px] bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        {step === "password" ? (
+          <form onSubmit={handlePasswordSubmit}>
+            <div className="mb-4">
+              <label htmlFor="email" className="mb-1.5 block text-[13px] font-medium text-[#1d1d1f]">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="username"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-[10px] border border-[#d2d2d7] px-3.5 py-2.5 text-[15px] text-[#1d1d1f] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
+              />
+            </div>
 
-        <div className="mb-6">
-          <label
-            htmlFor="password"
-            className="mb-1.5 block text-[13px] font-medium text-[#1d1d1f]"
-          >
-            Password
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-[10px] border border-[#d2d2d7] px-3.5 py-2.5 pr-11 text-[15px] text-[#1d1d1f] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
-            />
+            <div className="mb-6">
+              <label htmlFor="password" className="mb-1.5 block text-[13px] font-medium text-[#1d1d1f]">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-[10px] border border-[#d2d2d7] px-3.5 py-2.5 pr-11 text-[15px] text-[#1d1d1f] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  tabIndex={-1}
+                  className="absolute right-0 top-0 flex h-full w-11 items-center justify-center text-[#86868b] hover:text-[#1d1d1f]"
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <p className="mb-4 text-[13px] text-[#d70015]" role="alert">
+                {error}
+              </p>
+            )}
+
             <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              tabIndex={-1}
-              className="absolute right-0 top-0 flex h-full w-11 items-center justify-center text-[#86868b] hover:text-[#1d1d1f]"
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-full bg-[#0066cc] py-2.5 text-[15px] font-medium text-white transition hover:bg-[#0071e3] disabled:opacity-60"
             >
-              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              {loading ? "Checking\u2026" : "Continue"}
             </button>
-          </div>
-        </div>
+          </form>
+        ) : (
+          <form onSubmit={handleCodeSubmit}>
+            {info && (
+              <p className="mb-4 text-[13px] text-[#1d1d1f]">{info}</p>
+            )}
 
-        {error && (
-          <p className="mb-4 text-[13px] text-[#d70015]" role="alert">
-            {error}
-          </p>
+            <div className="mb-6">
+              <label htmlFor="code" className="mb-1.5 block text-[13px] font-medium text-[#1d1d1f]">
+                6-digit code
+              </label>
+              <input
+                id="code"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                autoComplete="one-time-code"
+                required
+                autoFocus
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                className="w-full rounded-[10px] border border-[#d2d2d7] px-3.5 py-2.5 text-center text-[20px] tracking-[6px] text-[#1d1d1f] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
+              />
+            </div>
+
+            {error && (
+              <p className="mb-4 text-[13px] text-[#d70015]" role="alert">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || code.length !== 6}
+              className="mb-3 w-full rounded-full bg-[#0066cc] py-2.5 text-[15px] font-medium text-white transition hover:bg-[#0071e3] disabled:opacity-60"
+            >
+              {loading ? "Verifying\u2026" : "Verify and sign in"}
+            </button>
+
+            <div className="flex items-center justify-between text-[13px]">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("password");
+                  setError(null);
+                  setInfo(null);
+                }}
+                className="text-[#86868b] hover:text-[#1d1d1f]"
+              >
+                &larr; Start over
+              </button>
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={loading}
+                className="text-[#0066cc] hover:underline disabled:opacity-60"
+              >
+                Resend code
+              </button>
+            </div>
+          </form>
         )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-full bg-[#0066cc] py-2.5 text-[15px] font-medium text-white transition hover:bg-[#0071e3] disabled:opacity-60"
-        >
-          {loading ? "Signing in\u2026" : "Sign in"}
-        </button>
-      </form>
+      </div>
 
       <p className="mt-6 text-center text-[12px] text-[#86868b]">
         This is a private admin area for the site owner only.
       </p>
     </div>
   );
+}
+
+function maskEmail(email: string) {
+  const [user, domain] = email.split("@");
+  if (!domain) return email;
+  const visible = user.slice(0, 2);
+  return `${visible}${"*".repeat(Math.max(1, user.length - 2))}@${domain}`;
 }
 
 function EyeIcon() {
